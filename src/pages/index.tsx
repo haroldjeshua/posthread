@@ -1,4 +1,4 @@
-import NewThreadForm from "~/components/NewThreadForm";
+import { NewThreadForm } from "~/components/NewThreadForm";
 
 export default function Home() {
 
