@@ -11,6 +11,6 @@ export default function Button({ small = false, gray = false, className="", ...p
     const colorClasses = gray ? "bg-gray-400 hover:bg-gray-300 focus-visible:bg-gray-300" : "bg-blue-400 hover:bg-blue-300 focus-visible:bg-blue-300"
     
   return (
-    <button className={`rounded-full transition-colors duration-200 disabled:cursor-not-allowed disabled:opacity-50 text-white ${sizeClasses} ${colorClasses} ${className}`} {...props}>Button</button>
+    <button className={`rounded-full transition-colors duration-200 disabled:cursor-not-allowed disabled:opacity-50 text-white ${sizeClasses} ${colorClasses} ${className}`} {...props}>Post</button>
   )
 }
