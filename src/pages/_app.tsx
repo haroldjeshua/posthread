@@ -16,6 +16,7 @@ const MyApp: AppType<{ session: Session | null }> = ({
         <title>Posthread</title>
         <meta name="description" content="A microblogging webapp" />
         <link rel="icon" href="/favicon.ico" />
+        <link rel="stylesheet" href="https://rsms.me/inter/inter.css"></link>
       </Head>
       <div className="container mx-auto flex items-start sm:pr-4">
         <SideNav />
