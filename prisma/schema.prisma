@@ -3,7 +3,6 @@
 
 generator client {
     provider        = "prisma-client-js"
-    previewFeatures = ["jsonProtocol"]
 }
 
 datasource db {
@@ -21,6 +20,7 @@ model Thread {
     user  User   @relation(fields: [userId], references: [id], onDelete: Cascade)
     likes Like[]
 
+    @@unique([createdAt, id])
     @@index([userId])
 }
 
