@@ -120,7 +120,7 @@ function LikeButton({ likedByMe, likeCount }: LikeButtonProps) {
     >
 			<IconHoverEffect red>
 				<LikeIcon
-					className={`transition-colors duration-200 ${
+					className={`transition-colors duration-200 -ml-2 ${
 						likedByMe
 						? "fill-red-500"
 						: "fill-gray-500 group-hover:fill-red-500 group-focus-visible:fill-red-500"
