@@ -2,7 +2,8 @@ import InfiniteScroll from "react-infinite-scroll-component";
 import ProfileImage from "./ProfileImage";
 import Link from "next/link";
 import { useSession } from "next-auth/react";
-import { TbHeartFilled, TbHeart } from "react-icons/io5";
+import { VscHeartFilled, VscHeart } from "react-icons/vsc";
+import IconHoverEffect from "./IconHoverEffect";
 
 type Thread = {
   id: string;
@@ -98,7 +99,7 @@ type LikeButtonProps = {
 
 function LikeButton({ likedByMe, likeCount }: LikeButtonProps) {
   const session = useSession();
-  const LikeIcon = likedByMe ? TbHeartFilled : TbHeart;
+  const LikeIcon = likedByMe ? VscHeartFilled : VscHeart;
 
   if (session.status !== "authenticated") {
 		return (
@@ -117,13 +118,16 @@ function LikeButton({ likedByMe, likeCount }: LikeButtonProps) {
           : "text-gray-500 hover:text-red-500 focus-visible:fill-red-500"
       }`}
     >
-      <LikeIcon
-        className={`transition-colors duration-200 ${
-          likedByMe
-            ? "fill-red-500"
-            : "fill-gray-500 group-focus-visible:fill-red-500"
-        }`}
-      />
+			<IconHoverEffect red>
+				<LikeIcon
+					className={`transition-colors duration-200 ${
+						likedByMe
+						? "fill-red-500"
+						: "fill-gray-500 group-hover:fill-red-500 group-focus-visible:fill-red-500"
+					}`}
+					/>
+				</IconHoverEffect>
+			<span>{likeCount}</span>
     </button>
   );
 }
