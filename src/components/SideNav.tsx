@@ -10,7 +10,7 @@ export default function SideNav() {
   return (
     <nav className="sticky top-0 px-2 py-4">
       <div className="mb-4">
-        <Link href="/" className="text-xl font-bold">
+        <Link href="/" className="text-base font-bold sm:text-sm lg:text-lg xl:text-xl">
           Posthread
         </Link>
       </div>

@@ -28,6 +28,8 @@ function Form() {
     textAreaRef.current = textArea;
   }, []);
 
+  const trpcUtils = api.useContext()
+
   useLayoutEffect(() => {
     updateTextAreaSize(textAreaRef.current);
   }, [inputValue]);
@@ -35,6 +37,34 @@ function Form() {
   const createThread = api.thread.create.useMutation({
     onSuccess: (newThread) => {
       setInputValue("");
+
+      if (session.status !== "authenticated") return
+
+      trpcUtils.thread.infiniteFeed.setInfiniteData({}, (oldData) => {
+        if (oldData == null || oldData.pages[0] == null) return
+
+        const newCacheThread = {
+          ...newThread,
+          likeCount: 0,
+          likedByMe: false,
+          user: {
+            id: session.data.user.id,
+            name: session.data.user.name || null,
+            image: session.data.user.image || null,
+          }
+        }
+        
+        return {
+          ...oldData,
+          page: [
+            {
+              ...oldData.pages[0],
+              threads: [newCacheThread, ...oldData.pages[0].threads],
+            },
+            ...oldData.pages.slice(1)
+          ]
+        }
+      })
     },
   });
 

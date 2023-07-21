@@ -5,6 +5,7 @@ import { useSession } from "next-auth/react";
 import { VscHeartFilled, VscHeart } from "react-icons/vsc";
 import IconHoverEffect from "./IconHoverEffect";
 import { api } from "~/utils/api";
+import LoadingSpinner from "./LoadingSpinner";
 
 type Thread = {
   id: string;
@@ -18,7 +19,7 @@ type Thread = {
 type InfiniteThreadListProps = {
   isLoading: boolean;
   isError: boolean;
-  hasMore: boolean;
+  hasMore: boolean | undefined;
   fetchNewThreads: () => Promise<unknown>;
   threads?: Thread[];
 };
@@ -28,9 +29,9 @@ export default function InfiniteThreadList({
   isError,
   isLoading,
   fetchNewThreads,
-  hasMore,
+  hasMore = false,
 }: InfiniteThreadListProps) {
-  if (isLoading) return <h1>Loading...</h1>;
+  if (isLoading) return <LoadingSpinner />;
   if (isError) return <h1>Error...</h1>;
   if (threads == null || threads.length === 0) {
     return (
@@ -46,7 +47,7 @@ export default function InfiniteThreadList({
         dataLength={threads.length}
         next={fetchNewThreads}
         hasMore={hasMore}
-        loader={"Loading..."}
+        loader={<LoadingSpinner />}
       >
         {threads.map((thread) => (
           <ThreadCard key={thread.id} {...thread} />
@@ -68,7 +69,40 @@ function ThreadCard({
   likeCount,
   likedByMe,
 }: Thread) {
-  const toggleLike = api.thread.toggleLike.useMutation();
+  const trpcUtils = api.useContext();
+  const toggleLike = api.thread.toggleLike.useMutation({
+    onSuccess: ({ addedLike }) => {
+      const updateData: Parameters<
+        typeof trpcUtils.thread.infiniteFeed.setInfiniteData
+      >[1] = (oldData) => {
+        if (oldData == null) return;
+
+        const countModifier = addedLike ? 1 : -1;
+
+        return {
+          ...oldData,
+          pages: oldData.pages.map((page) => {
+            return {
+              ...page,
+              threads: page.threads.map((thread) => {
+                if (thread.id === id) {
+                  return {
+                    ...thread,
+                    likeCount: thread.likeCount + countModifier,
+                    likedByMe: addedLike,
+                  };
+                }
+
+                return thread;
+              }),
+            };
+          }),
+        };
+      };
+
+      trpcUtils.thread.infiniteFeed.setInfiniteData({}, updateData);
+    },
+  });
 
   function handleToggleLike() {
     toggleLike.mutate({ id });
@@ -111,7 +145,12 @@ type LikeButtonProps = {
   likeCount: number;
 };
 
-function LikeButton({ onClick, isLoading, likedByMe, likeCount }: LikeButtonProps) {
+function LikeButton({
+  onClick,
+  isLoading,
+  likedByMe,
+  likeCount,
+}: LikeButtonProps) {
   const session = useSession();
   const LikeIcon = likedByMe ? VscHeartFilled : VscHeart;
 
@@ -136,7 +175,7 @@ function LikeButton({ onClick, isLoading, likedByMe, likeCount }: LikeButtonProp
     >
       <IconHoverEffect red>
         <LikeIcon
-          className={`-ml-2 transition-colors duration-200 ${
+          className={`transition-colors duration-200 ${
             likedByMe
               ? "fill-red-500"
               : "fill-gray-500 group-hover:fill-red-500 group-focus-visible:fill-red-500"
