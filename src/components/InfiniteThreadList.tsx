@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useSession } from "next-auth/react";
 import { VscHeartFilled, VscHeart } from "react-icons/vsc";
 import IconHoverEffect from "./IconHoverEffect";
+import { api } from "~/utils/api";
 
 type Thread = {
   id: string;
@@ -67,6 +68,12 @@ function ThreadCard({
   likeCount,
   likedByMe,
 }: Thread) {
+  const toggleLike = api.thread.toggleLike.useMutation();
+
+  function handleToggleLike() {
+    toggleLike.mutate({ id });
+  }
+
   return (
     <li className="flex gap-4 border-b px-4 py-4">
       <Link href={`/profiles/${user.id}`}>
@@ -86,48 +93,57 @@ function ThreadCard({
           </time>
         </div>
         <p className="whitespace-pre-wrap">{content}</p>
-        <LikeButton likedByMe={likedByMe} likeCount={likeCount} />
+        <LikeButton
+          onClick={handleToggleLike}
+          isLoading={toggleLike.isLoading}
+          likedByMe={likedByMe}
+          likeCount={likeCount}
+        />
       </div>
     </li>
   );
 }
 
 type LikeButtonProps = {
+  onClick: () => void;
+  isLoading: boolean;
   likedByMe: boolean;
   likeCount: number;
 };
 
-function LikeButton({ likedByMe, likeCount }: LikeButtonProps) {
+function LikeButton({ onClick, isLoading, likedByMe, likeCount }: LikeButtonProps) {
   const session = useSession();
   const LikeIcon = likedByMe ? VscHeartFilled : VscHeart;
 
   if (session.status !== "authenticated") {
-		return (
-			<div className="flex items-center gap-3 self-start text-gray-500 mt-1 mb-1">
-				<LikeIcon />
-				<span>{likeCount}</span>
-			</div>
-		)
+    return (
+      <div className="mb-1 mt-1 flex items-center gap-3 self-start text-gray-500">
+        <LikeIcon />
+        <span>{likeCount}</span>
+      </div>
+    );
   }
 
   return (
     <button
+      disabled={isLoading}
+      onClick={onClick}
       className={`group flex items-center gap-1 self-start transition-colors duration-200 ${
         likedByMe
           ? "text-red-500"
           : "text-gray-500 hover:text-red-500 focus-visible:fill-red-500"
       }`}
     >
-			<IconHoverEffect red>
-				<LikeIcon
-					className={`transition-colors duration-200 -ml-2 ${
-						likedByMe
-						? "fill-red-500"
-						: "fill-gray-500 group-hover:fill-red-500 group-focus-visible:fill-red-500"
-					}`}
-					/>
-				</IconHoverEffect>
-			<span>{likeCount}</span>
+      <IconHoverEffect red>
+        <LikeIcon
+          className={`-ml-2 transition-colors duration-200 ${
+            likedByMe
+              ? "fill-red-500"
+              : "fill-gray-500 group-hover:fill-red-500 group-focus-visible:fill-red-500"
+          }`}
+        />
+      </IconHoverEffect>
+      <span>{likeCount}</span>
     </button>
   );
 }
