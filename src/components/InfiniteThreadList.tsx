@@ -101,6 +101,8 @@ function ThreadCard({
       };
 
       trpcUtils.thread.infiniteFeed.setInfiniteData({}, updateData);
+      trpcUtils.thread.infiniteFeed.setInfiniteData({ onlyFollowing: true }, updateData);
+      trpcUtils.thread.infiniteProfileFeed.setInfiniteData({ userId: user.id }, updateData);
     },
   });
 
